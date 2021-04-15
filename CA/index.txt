@@ -1,0 +1,4 @@
+V	220412144618Z		01	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=Kriptografija i racunarska zastita/CN=carak/emailAddress=carak@mail.com
+V	220412144722Z		02	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=Kriptografija i racunarska zastita/CN=kiki/emailAddress=kiki@mail.com
+R	220415213120Z	210415221612Z,unspecified	03	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=Kriptografija i racunarska zastita/CN=fifi/emailAddress=fifi@mail.com
+V	220415225158Z		04	unknown	/C=BA/ST=RS/O=Elektrotehnicki fakultet/OU=Kriptografija i racunarska zastita/CN=tuki/emailAddress=tuki@mail.com

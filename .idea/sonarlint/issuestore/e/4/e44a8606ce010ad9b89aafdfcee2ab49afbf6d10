@@ -1,0 +1,31 @@
+
+”
+java:S1130"wRemove the declaration of thrown exception 'java.lang.InterruptedException', as it cannot be thrown from method's body.(τέλ8ÿο‹•/
+G
+java:S1481Υ")Remove this unused "file" local variable.(•““ε8υχΰκ/
+o
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 62 to the 15 allowed.(τέλ8‡κη/
+K
+java:S1199·"-Extract this nested code block into a method.(λ®¤Φ8‡κη/
+O
+java:S1481"2Remove this unused "currentFolder" local variable.(»8–Ψαθ/
+K
+java:S1199Ί"-Extract this nested code block into a method.(όΨτ8‡κη/
+f
+java:S1192"PDefine a constant instead of duplicating this literal "users/users.txt" 5 times.(‘•Βε
+P
+java:S1199—"-Extract this nested code block into a method.(»φ©ªώÿÿÿÿ8‡κη/
+P
+java:S1199κ"-Extract this nested code block into a method.(ύαςόÿÿÿÿ8¥ƒώ’/
+j
+java:S1192Μ"GDefine a constant instead of duplicating this literal "logout" 3 times.(ϋΐΏςώÿÿÿÿ8££”κ/
+K
+java:S1199Ρ"-Extract this nested code block into a method.(ΟΏ³¶8®ψªκ/
+J
+java:S1199ΰ"-Extract this nested code block into a method.(΄‰φ$8§σέ/
+K
+java:S1199ν"-Extract this nested code block into a method.(όΨτ8¥ƒώ’/
+J
+java:S1199M"-Extract this nested code block into a method.(”’μ’8‡κη/
+K
+java:S1199΄"-Extract this nested code block into a method.(Α‰ª8‡κη/
