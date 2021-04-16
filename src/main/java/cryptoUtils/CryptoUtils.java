@@ -88,6 +88,10 @@ public class CryptoUtils {
 
     public static PublicKey readPublicKey(String keyName){
         File publicKeyFile = new File(Paths.get("").toAbsolutePath() + File.separator + "CA" + File.separator + "public" + File.separator + keyName + ".key");
+        if(!publicKeyFile.exists()){
+            System.out.println("Key does not exist!");
+            return null;
+        }
         PublicKey publicKey = null;
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -106,6 +110,10 @@ public class CryptoUtils {
 
     public static PrivateKey readPrivateKey(String keyName){
         File privateKeyFile = new File(Paths.get("").toAbsolutePath() + File.separator + "CA" + File.separator + "private" + File.separator + keyName + ".key");
+        if(!privateKeyFile.exists()){
+            System.out.println("Key does not exist!");
+            return null;
+        }
         PrivateKey privateKey = null;
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -124,6 +132,9 @@ public class CryptoUtils {
 
     public static byte[] asymmetricEncrypt(byte[] input, String keyName){
         PublicKey publicKey = readPublicKey(keyName);
+        if(publicKey == null){
+            return new byte[0];
+        }
         Cipher cipher;
         byte[] output = null;
         try {
@@ -138,6 +149,9 @@ public class CryptoUtils {
 
     public static byte[] asymmetricDecrypt(byte[] input, String keyName){
         PrivateKey privateKey = readPrivateKey(keyName);
+        if(privateKey == null){
+            return new byte[0];
+        }
         Cipher cipher;
         byte[] output = null;
         try {
@@ -200,7 +214,7 @@ public class CryptoUtils {
     public static boolean checkCertificateValidity(String name){
         X509Certificate certificate = getCertificate(name);
         X509Certificate caCertificate = getCertificate("rootca");
-        X509CRL crl = getCrl(name);
+        X509CRL crl = getCrl("list1");
         try {
             certificate.verify(caCertificate.getPublicKey());
         } catch (CertificateException | SignatureException | NoSuchProviderException | InvalidKeyException | NoSuchAlgorithmException e) {
@@ -218,5 +232,31 @@ public class CryptoUtils {
             return false;
         }
         return true;
+    }
+
+    public static byte[] signFile(byte[] input, String keyName){
+        byte[] signatureData = null;
+        try {
+            Signature signature = Signature.getInstance("SHA1withRSA");
+            signature.initSign(CryptoUtils.readPrivateKey(keyName));
+            signature.update(input);
+            signatureData = signature.sign();
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            e.printStackTrace();
+        }
+        return signatureData;
+    }
+
+    public static boolean verifySignature(byte[] input, byte[] signatureBytes, String keyName){
+        boolean isVerified = false;
+        try {
+            Signature verifySignature = Signature.getInstance("SHA1withRSA");
+            verifySignature.initVerify(CryptoUtils.readPublicKey(keyName));
+            verifySignature.update(input);
+            isVerified = verifySignature.verify(signatureBytes);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
+            e.printStackTrace();
+        }
+        return isVerified;
     }
 }

@@ -16,7 +16,7 @@ public class SSFolder extends SSFile implements Serializable {
     }
 
     public SSFile findFile(String name) {
-        Optional<SSFile> optional = files.stream().filter(item -> item.path.endsWith(name)).findFirst();
+        Optional<SSFile> optional = files.stream().filter(item -> item.path.endsWith(name + "/")).findFirst();
         return optional.orElse(null);
     }
 
@@ -37,5 +37,9 @@ public class SSFolder extends SSFile implements Serializable {
         str += super.print(depth,isRoot) + System.lineSeparator();
         str += files.stream().map(item -> item.print(depth + 1, false)).reduce("", (a,b)-> a+b);
         return str;
+    }
+
+    public String print(){
+        return this.getPath();
     }
 }

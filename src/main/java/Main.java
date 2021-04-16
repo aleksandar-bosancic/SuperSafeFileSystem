@@ -5,7 +5,6 @@ import fileSystem.SSFileSystem;
 import fileSystem.SSFolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import javax.crypto.*;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -13,16 +12,15 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.*;
-import java.security.spec.*;
-import java.util.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.Security;
 import java.util.List;
-
-import static cryptoUtils.CryptoUtils.getCrl;
+import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InterruptedException, ClassNotFoundException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, SignatureException {
+    public static void main(String[] args) throws IOException {
         Security.addProvider(new BouncyCastleProvider());
         SSFolder currentFolder;
         List<User> allUsers = null;
@@ -35,7 +33,7 @@ public class Main {
         if(fileSystem == null){
             fileSystem = new SSFileSystem();
         }
-
+        currentFolder = fileSystem.getRoot();
 //        ProcessBuilder builder = new ProcessBuilder(
 //                "cmd.exe", "/c", "cd CA && .\\gencert.sh fifi");
 //        builder.redirectErrorStream(true);
@@ -48,31 +46,32 @@ public class Main {
 //            System.out.println(line);
 //        }
 
-        CryptoUtils.generateCertificate("tuki");
+//        CryptoUtils.generateCertificate("tuki");
 
         Utils.writeWelcomeMessage("");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
+        fileSystem.addNewFolder("kiki/");
+        fileSystem.addNewFolder("carak/");
+//        fileSystem.addNewFolder("kiki/newFolder/");
+//        fileSystem.addNewFolder("kiki/newFolder2/");
+//        fileSystem.addNewFolder("tuki");
+//        fileSystem.addNewFolder("tuki/veliki/");
+//        System.out.println("Current: " + currentFolder.print());
+        System.out.println(fileSystem);
+//        String stringToSign = "Neki string sto ga treba potpisati.";
+//        byte[] stringData = stringToSign.getBytes(StandardCharsets.UTF_8);
+//
+//        byte[] signatureBytes = CryptoUtils.signFile(stringData,"carak");
+//
+//        String base64encodedStringLine = Base64.getEncoder().encodeToString(signatureBytes);
+//        System.out.println("Signature: " + base64encodedStringLine);
+//
+//        boolean isVerified = CryptoUtils.verifySignature(stringData, signatureBytes, "miki");
+//
+//        System.out.println("Verified: " + isVerified);
 
-        String stringToSign = "Neki string sto ga treba potpisati.";
-        byte[] stringData = stringToSign.getBytes(StandardCharsets.UTF_8);
-
-        Signature signature = Signature.getInstance("SHA1withRSA");
-        signature.initSign(CryptoUtils.readPrivateKey("carak"));
-        signature.update(stringData);
-        byte[] signatureBytes = signature.sign();
-
-        String base64encodedStringLine = Base64.getEncoder().encodeToString(signatureBytes);
-        System.out.println("Signature: " + base64encodedStringLine);
-
-        Signature verifySignature = Signature.getInstance("SHA1withRSA");
-        verifySignature.initVerify(CryptoUtils.readPublicKey("carak"));
-        verifySignature.update(stringData);
-        boolean isVerified = verifySignature.verify(signatureBytes);
-
-        System.out.println("Verified: " + isVerified);
-
-        getCrl("list1");
+//        getCrl("list1");
 
 //        Path current = Paths.get("");
 //        byte[] bytes = Files.readAllBytes(nonEncryptedFile.toPath());
@@ -87,8 +86,7 @@ public class Main {
 //        Desktop.getDesktop().open(newNonFile);
 
         String command = "";
-        while (!command.equals("exit")){
-//            System.out.println(fileSystem);
+        while (true){
             System.out.print(">");
             command = bufferedReader.readLine();
             switch (command) {
@@ -160,6 +158,7 @@ public class Main {
                         if (writeUser(newUser)) {
                             System.out.println("New user successfully registered!\nCreating new user directory...\n");
                             CryptoUtils.generateCertificate(username);
+                            fileSystem.addNewFolder(username + "/");
                             newUser.setRoot(fileSystem.addNewFolder(username));
                         }
                     } else {
@@ -187,7 +186,8 @@ public class Main {
                             if(passwordHash.equals(currentUser.getPassword())){
                                 if(CryptoUtils.checkCertificateValidity(username)){
                                     System.out.println("Login successful!\n");
-//                                System.out.println("=============" + fileSystem.findFolder("/"+currentUser.getUsername()+"/").getPath());
+                                    currentFolder = fileSystem.findFolder(username);
+                                    currentUser.setRoot(currentFolder);
                                     userWorkspace(currentUser, fileSystem);
                                 } else {
                                     System.out.println("Certificate is not valid!");
@@ -201,21 +201,18 @@ public class Main {
                     }
                 }
                 case "exit" ->{
+                    System.out.println("Good bye!");
                     fileSystem.serialize();
+                    bufferedReader.close();
+                    return;
                 }
-                case "print cert" -> {
-                    System.out.println(CryptoUtils.getCertificate("rootca"));
-                }
-                default -> {
-                    System.out.println("Wrong command, please enter valid command!");
-                }
+                default -> System.out.println("Wrong command, please enter valid command!");
             }
         }
-        fileSystem.serialize();
-        bufferedReader.close();
     }
 
     public static void userWorkspace(User currentUser, SSFileSystem fileSystem) throws IOException {
+        String argumentNumberError = "Insufficient number of arguments!";
         SSFolder currentFolder = currentUser.getRoot();
         Utils.writeWelcomeMessage(currentUser.getUsername());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -223,17 +220,17 @@ public class Main {
         String fullCommand;
         String[] commandList;
         String command;
-//        System.out.print(currentFolder.getPath() + "> ");
         while (!exitCommand.equals("logout")){
+            System.out.print(currentFolder.getPath() + "> ");
             fullCommand = bufferedReader.readLine();
             commandList = fullCommand.split(" ");
             command = commandList[0];
             switch (command){
                 case "makefile" -> {
                     if(commandList.length < 3){
-                        System.out.println("Insufficient number of arguments!");
+                        System.out.println(argumentNumberError);
                     } else {
-                        SSFile file = new SSFile("/" + currentUser.getUsername() + "/" + commandList[1] + "/",
+                        SSFile file = new SSFile(currentFolder.getPath() + "/" + commandList[1] + "/",
                                                 currentUser.getUsername(), fullCommand.split(" ", 3)[2].getBytes());
                         currentFolder.addFile(commandList[1], false, fullCommand.split(" ", 3)[2].getBytes());
 //                        Path current = Paths.get("");
@@ -246,7 +243,7 @@ public class Main {
                 }
                 case "getfile" -> {
                     if(commandList.length < 2){
-                        System.out.println("Insufficient number of arguments!");
+                        System.out.println(argumentNumberError);
                     } else {
                         SSFile tempFile = currentFolder.findFile(commandList[1]);
                         File temp = new File(Paths.get("").toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1]);
@@ -256,7 +253,7 @@ public class Main {
                 }
                 case "message" -> {
                     if(commandList.length < 3){
-                        System.out.println("Insufficient number of arguments!");
+                        System.out.println(argumentNumberError);
                     } else {
 
                     }

@@ -19,3 +19,11 @@ G
 src/main/java/Main.java,e\4\e44a8606ce010ad9b89aafdfcee2ab49afbf6d10
 =
 Root/neki.txt,2\5\2584b9b84f40078363d5134263860baff183313d
+?
+users/users.txt,f\b\fb59e42e4af9d57c64d874005b0306104d1de7f3
+C
+CA/public/carak.key,9\f\9fc5489e7735039a42f366aa48ef7773aa5ba4f7
+;
+encfile.txt,9\0\90967ff781d43ab0d3c9ebb0ca058f98b68bd8d9
+;
+decfile.txt,c\b\cb927672b3c382e090d6ec1d6b97d47fff677ff3
