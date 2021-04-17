@@ -5,6 +5,8 @@ import fileSystem.SSFileSystem;
 import fileSystem.SSFolder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
@@ -51,7 +53,7 @@ public class Main {
         Utils.writeWelcomeMessage("");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
-//        fileSystem.addNewFolder("kiki/");
+        fileSystem.addNewFolder("kiki/");
 //        fileSystem.addNewFolder("fifi/");
 //        fileSystem.addNewFolder("carak/");
 //        fileSystem.addNewFolder("pipi");
@@ -75,7 +77,7 @@ public class Main {
 
 //        getCrl("list1");
 
-//        Path current = Paths.get("");
+//        File nonEncryptedFile = new File(Paths.get("").toAbsolutePath() + File.separator + "neki.txt");
 //        byte[] bytes = Files.readAllBytes(nonEncryptedFile.toPath());
 //        SecretKey key = CryptoUtils.generateKey("AES");
 //        byte[] encBytes = CryptoUtils.symmetricEncrypt(bytes, 3, key);
@@ -151,7 +153,7 @@ public class Main {
                             byte[] salt = new byte[32];
                             random.nextBytes(salt);
                             String encryptedPassword = CryptoUtils.encryptPassword(password, salt, hashCode);
-                            newUser = new User(username, encryptedPassword, salt, hashCode, cypherCode);
+                            newUser = new User(username, encryptedPassword, salt, hashCode, cypherCode, CryptoUtils.generateKey(cypherCode));
                             allUsers.add(newUser);
                         } catch (NoSuchAlgorithmException e) {
                             System.out.println("No such algorithm");
@@ -160,8 +162,8 @@ public class Main {
                         if (writeUser(newUser)) {
                             System.out.println("New user successfully registered!\nCreating new user directory...\n");
                             CryptoUtils.generateCertificate(username);
-                            fileSystem.addNewFolder(username + "/");
-                            newUser.setRoot(fileSystem.addNewFolder(username));
+//                            fileSystem.addNewFolder(username);
+                            newUser.setRoot(fileSystem.addNewFolder(username + "/"));
                         }
                     } else {
                         System.out.println("\nPasswords do not match.");
@@ -236,7 +238,8 @@ public class Main {
                     }
 //                        SSFile file = new SSFile(currentFolder.getPath() + "/" + commandList[1] + "/",
 //                                                currentUser.getUsername(), fullCommand.split(" ", 3)[2].getBytes());
-                    currentFolder.addFile(commandList[1], false, fullCommand.split(" ", 3)[2].getBytes());
+                    byte[] bytes = CryptoUtils.symmetricEncrypt(fullCommand.split(" ", 3)[2].getBytes(), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
+                    currentFolder.addFile(commandList[1], false, bytes);//fullCommand.split(" ", 3)[2].getBytes());
 //                        Path current = Paths.get("");
 //                        File tempFile = new File(current.toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1] + ".txt");
 //                        String temp = fullCommand.split(" ", 3)[2];
@@ -250,8 +253,13 @@ public class Main {
                         break;
                     }
                     SSFile tempFile = currentFolder.findFile(commandList[1]);
+                    if(tempFile == null){
+                        System.out.println("File not found!");
+                        break;
+                    }
                     File temp = new File(Paths.get("").toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1]);
-                    Files.write(temp.toPath(), tempFile.getContent());
+                    byte[] bytes = CryptoUtils.symmetricDecrypt(tempFile.getContent(), currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
+                    Files.write(temp.toPath(), bytes);//tempFile.getContent());
                     Desktop.getDesktop().open(temp);
 
                 }
@@ -323,11 +331,18 @@ public class Main {
                 String decodedLine = new String(Base64.getDecoder().decode(line), StandardCharsets.UTF_8);
                 String username = decodedLine.split(" # ")[0];
                 String password = decodedLine.split(" # ")[1];
-                String salt = decodedLine.split(" # ")[2];
+                byte[] salt = Base64.getDecoder().decode(decodedLine.split(" # ")[2]);
                 int hashAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[3]);
                 int cryptoAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[4]);
-                byte[] byteSalt = Utils.convertSalt(salt);
-                user = new User(username, password, byteSalt, hashAlgorithmCode, cryptoAlgorithmCode);
+                byte[] secretKeyBytes = Base64.getDecoder().decode(decodedLine.split(" # ")[5]);
+                String algorithm;
+                switch (cryptoAlgorithmCode){
+                    case 1 -> algorithm = "DES";
+                    case 2 -> algorithm = "RC4";
+                    default -> algorithm = "AES";
+                }
+                SecretKey secretKey = new SecretKeySpec(secretKeyBytes,algorithm);
+                user = new User(username, password, salt, hashAlgorithmCode, cryptoAlgorithmCode, secretKey);
                 allUsers.add(user);
             }
         } catch (IOException e) {
@@ -348,9 +363,11 @@ public class Main {
                 status = file.createNewFile();
             }
             String stringLine = user.getUsername() + " # " + user.getPassword() + " # "
-                                                   + Arrays.toString(user.getSalt()) + " # "
+                                                   + Base64.getEncoder().encodeToString(user.getSalt()) + " # "
                                                    + user.getHashAlgorithmCode() + " # "
-                                                   + user.getCryptoAlgorithmCode();
+                                                   + user.getCryptoAlgorithmCode() + " # "
+                                                   + Base64.getEncoder().encodeToString(user.getSymmetricKey().getEncoded());
+            writeHash("upis" + Base64.getEncoder().encodeToString(user.getSymmetricKey().getEncoded()));
             String base64encodedStringLine = Base64.getEncoder().encodeToString(stringLine.getBytes());
             bufferedWriter.write(base64encodedStringLine);
             bufferedWriter.newLine();

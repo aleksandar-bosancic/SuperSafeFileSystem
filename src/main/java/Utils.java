@@ -5,14 +5,14 @@ public class Utils {
         File file = new File(path);
         return file.exists();
     }
-    public static byte[] convertSalt(String salt){
-        byte[] byteSalt = new byte[32];
-        String[] strings = salt.split("\\[|\\]|, ");
-        for(int i = 1; i < strings.length; i++){
-            byteSalt[i - 1] = Byte.parseByte(strings[i]);
-        }
-        return byteSalt;
-    }
+//    public static byte[] convertSalt(String salt){
+//        byte[] byteSalt = new byte[32];
+//        String[] strings = salt.split("\\[|\\]|, ");
+//        for(int i = 1; i < strings.length; i++){
+//            byteSalt[i - 1] = Byte.parseByte(strings[i]);
+//        }
+//        return byteSalt;
+//    }
     public static void writeWelcomeMessage(String username){
         String ssTextBlock = """
                 ╔════════════════════════════════════════════════╗
@@ -38,7 +38,7 @@ public class Utils {
             System.out.println("Insufficient number of arguments!");
             return false;
         }
-        if(commandList[1].length() > 10){
+        if(commandList[1].length() > 15){
             System.out.println("File name is too long!");
             return false;
         }

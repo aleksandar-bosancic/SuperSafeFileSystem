@@ -30,15 +30,20 @@ public class CryptoUtils {
             messageDigest.update(salt);
             hashPassword = new String(messageDigest.digest(password.getBytes()), StandardCharsets.UTF_8);
         } catch (NoSuchAlgorithmException e) {
-
             System.out.println("No such algorithm!");
         }
         return hashPassword;
     }
 
-    public static SecretKey generateKey(String algorithm){
+    public static SecretKey generateKey(int algorithmCode){
         KeyGenerator keyGenerator;
         SecretKey key = null;
+        String algorithm;
+        switch (algorithmCode){
+            case 1 -> algorithm = "DES";
+            case 2 -> algorithm = "RC4";
+            default -> algorithm = "AES";
+        }
         try {
             keyGenerator = KeyGenerator.getInstance(algorithm);
             key = keyGenerator.generateKey();

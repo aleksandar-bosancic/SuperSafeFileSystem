@@ -25,8 +25,15 @@ public class SSFileSystem implements Serializable {
         String[] splitedString = path.split("/");
         SSFolder temp = root;
 //        SSFile rootFile = root.findFile(splitedString[0]);
-        for(int i = 0; i < splitedString.length; i++) {
-            SSFile file = temp.findFile(splitedString[i]);
+        if(splitedString.length == 1){
+            SSFile tempFile = root.findFile(splitedString[0]);
+            if(tempFile instanceof SSFolder){
+                return (SSFolder) tempFile;
+            }
+            return root;
+        }
+        for (String s : splitedString) {
+            SSFile file = temp.findFile(s);
             if (file instanceof SSFolder) {
                 temp = (SSFolder) file;
             } else {

@@ -1,6 +1,2 @@
 
-Y
-java:S2589"7Remove this expression which always evaluates to "true"(αιψÿÿÿÿ8κΐ‚η/
-k
-java:S4201"IRemove this unnecessary null check; "instanceof" returns false for nulls.(αιψÿÿÿÿ8κΐ‚η/
 o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(Ρμά„

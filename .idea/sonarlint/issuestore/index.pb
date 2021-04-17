@@ -63,3 +63,15 @@ K
 CA/serial.old,7\4\7414a3b0fd04e9daa532eadba8b88c4e10f9a44e
 =
 CA/skripta.sh,f\7\f75e5e9e0feded82bed9675eee5dd890cfda7db6
+B
+CA/newcerts/04.pem,3\7\37bc3d0a4d1186258ff03ffbb76cae7486bfcae3
+D
+CA/requests/fifi.csr,b\8\b846d4807a96c3aafb86cb505ed7f5028e63ebae
+C
+CA/private/fifi.key,e\3\e3ac60f0f7fcad65d1956d10b051773418451cb9
+B
+CA/public/fifi.key,c\f\cf2367d6cceceb2bed8eafd7cc96ddf1d83ca66a
+A
+CA/certs/fifi.pem,9\3\93356fcf3a99d3d1b1431967790955e0b187f938
+C
+Root/FileSystem.bin,4\2\423a73eb670d1ddf78cb4ceed6d36f7e1d625b14

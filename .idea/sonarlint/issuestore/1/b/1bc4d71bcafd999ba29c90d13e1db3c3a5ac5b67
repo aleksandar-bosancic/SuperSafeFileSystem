@@ -1,6 +1,4 @@
 
-K
-java:S1068")Remove this unused "depth" private field.(‘íÕşÿÿÿÿ8ÿ¸£¶Œ/
 o	java:S120"ZRename this package name to match the regular expression '^[a-z_]+(\.[a-z_][a-z0-9_]*)*$'.(ÑìÜ„
 U
-java:S1161#":Add the "@Override" annotation above this method signature(×¹Ò„ùÿÿÿÿ
+java:S1161$":Add the "@Override" annotation above this method signature(×¹Ò„ùÿÿÿÿ
