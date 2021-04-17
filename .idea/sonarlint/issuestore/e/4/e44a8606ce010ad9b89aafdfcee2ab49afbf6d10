@@ -1,31 +1,31 @@
 
-K
-java:S1199æ"-Extract this nested code block into a method.(Ï¿³¶8õÙîä/
 j
-java:S1192à"GDefine a constant instead of duplicating this literal "logout" 3 times.(ûÀ¿òşÿÿÿÿ8õÙîä/
-J
-java:S1199ø"-Extract this nested code block into a method.(´‰ö$8õÙîä/
+java:S1192â"GDefine a constant instead of duplicating this literal "logout" 3 times.(ûÀ¿òşÿÿÿÿ8õÙîä/
 K
-java:S1199µ"-Extract this nested code block into a method.(üØô8æÊĞş/
-J
-java:S1199_"-Extract this nested code block into a method.(”’ì’8ŠË¸/
-P
-java:S1199²"-Extract this nested code block into a method.(ıˆáòüÿÿÿÿ8æÊĞş/
+java:S1199Ï"-Extract this nested code block into a method.(Á‰ª8ŠË¸/
 K
-java:S1199Í"-Extract this nested code block into a method.(Á‰ª8ŠË¸/
-K
-java:S1199¦"-Extract this nested code block into a method.(Õ˜ıƒ8¾ìæı/
-J
-java:S1199•"-Extract this nested code block into a method.(°Æ‰T8õ‚¥ı/
-p
-java:S3776Ø"RRefactor this method to reduce its Cognitive Complexity from 39 to the 15 allowed.(ñ÷Ğ‘8Îú§ı/
-K
-java:S1199"-Extract this nested code block into a method.(¿Ú¼İ8õ‚¥ı/
-P
-java:S1199‚"-Extract this nested code block into a method.(¿‹ñçùÿÿÿÿ8€—ëû/
-o
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 69 to the 15 allowed.(œû¿Ø8‡êçŒ/
+java:S1199®"-Extract this nested code block into a method.(Õ˜ıƒ8¾ìæı/
 f
-java:S1192"PDefine a constant instead of duplicating this literal "users/users.txt" 5 times.(‘•Âå
+java:S1192"PDefine a constant instead of duplicating this literal "users/users.txt" 5 times.(‘•Âå
+J
+java:S1199û"-Extract this nested code block into a method.(´‰ö$8õÙîä/
 P
-java:S1199«"-Extract this nested code block into a method.(»ö©ªşÿÿÿÿ8ŠË¸/
+java:S1199­"-Extract this nested code block into a method.(»ö©ªşÿÿÿÿ8ŠË¸/
+K
+java:S1199è"-Extract this nested code block into a method.(Ï¿³¶8õÙîä/
+J
+java:S1199a"-Extract this nested code block into a method.(”’ì’8ŠË¸/
+P
+java:S1199Š"-Extract this nested code block into a method.(¿‹ñçùÿÿÿÿ8€—ëû/
+K
+java:S1199˜"-Extract this nested code block into a method.(¿Ú¼İ8õ‚¥ı/
+K
+java:S1199½"-Extract this nested code block into a method.(üØô8æÊĞş/
+o
+java:S3776"RRefactor this method to reduce its Cognitive Complexity from 69 to the 15 allowed.(œû¿Ø8‡êçŒ/
+p
+java:S3776Ú"RRefactor this method to reduce its Cognitive Complexity from 42 to the 15 allowed.(ñ÷Ğ‘8Îú§ı/
+J
+java:S1199"-Extract this nested code block into a method.(°Æ‰T8õ‚¥ı/
+P
+java:S1199º"-Extract this nested code block into a method.(ıˆáòüÿÿÿÿ8æÊĞş/

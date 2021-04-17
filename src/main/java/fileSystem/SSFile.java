@@ -18,9 +18,9 @@ public class SSFile implements Serializable {
 
     public String print(int depth, boolean isRoot) {
         if(isRoot){
-            return "root";
+            return "├─root";
         }
-        String padding = IntStream.range(0,depth*4).mapToObj(item -> " ").reduce("", (a,b)-> a+b);
+        String padding = "└─" + IntStream.range(0,depth*4).mapToObj(item -> "─").reduce("", (a,b)-> a+b);
         String name = path.split("/")[path.split("/").length - 1];
         String printOut = padding + name;
         if(name.matches("[a-z]*\\.[a-z]+")){

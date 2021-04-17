@@ -11,8 +11,10 @@ import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -53,7 +55,6 @@ public class Main {
         Utils.writeWelcomeMessage("");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
-        fileSystem.addNewFolder("kiki/");
 //        fileSystem.addNewFolder("fifi/");
 //        fileSystem.addNewFolder("carak/");
 //        fileSystem.addNewFolder("pipi");
@@ -62,7 +63,7 @@ public class Main {
 //        fileSystem.addNewFolder("tuki");
 //        fileSystem.addNewFolder("tuki/veliki/");
 //        System.out.println("Current: " + currentFolder.print());
-        System.out.println(fileSystem);
+//        System.out.println(fileSystem);
 //        String stringToSign = "Neki string sto ga treba potpisati.";
 //        byte[] stringData = stringToSign.getBytes(StandardCharsets.UTF_8);
 //
@@ -88,7 +89,6 @@ public class Main {
 //        Files.write(newNonFile.toPath(), newDecriptedBytes);
 
 //        Desktop.getDesktop().open(newNonFile);
-
         String command = "";
         while (true){
             System.out.print(">");
@@ -162,7 +162,6 @@ public class Main {
                         if (writeUser(newUser)) {
                             System.out.println("New user successfully registered!\nCreating new user directory...\n");
                             CryptoUtils.generateCertificate(username);
-//                            fileSystem.addNewFolder(username);
                             newUser.setRoot(fileSystem.addNewFolder(username + "/"));
                         }
                     } else {
@@ -236,17 +235,8 @@ public class Main {
                     if(currentFolder.equals(fileSystem.getSharedFolder())){
                         System.out.println("This command is not allowed in shared folder!");
                     }
-//                        SSFile file = new SSFile(currentFolder.getPath() + "/" + commandList[1] + "/",
-//                                                currentUser.getUsername(), fullCommand.split(" ", 3)[2].getBytes());
                     byte[] bytes = CryptoUtils.symmetricEncrypt(fullCommand.split(" ", 3)[2].getBytes(), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
-                    currentFolder.addFile(commandList[1], false, bytes);//fullCommand.split(" ", 3)[2].getBytes());
-//                        Path current = Paths.get("");
-//                        File tempFile = new File(current.toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1] + ".txt");
-//                        String temp = fullCommand.split(" ", 3)[2];
-//                        Files.write(tempFile.toPath(), temp.getBytes());
-//                        Desktop.getDesktop().open(tempFile);
-
-//                    System.out.println(fileSystem);
+                    currentFolder.addFile(commandList[1], false, bytes);
                 }
                 case "getfile" -> {
                     if(!Utils.checkArguments(commandList, 2)){
@@ -261,7 +251,6 @@ public class Main {
                     byte[] bytes = CryptoUtils.symmetricDecrypt(tempFile.getContent(), currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
                     Files.write(temp.toPath(), bytes);//tempFile.getContent());
                     Desktop.getDesktop().open(temp);
-
                 }
                 case "makefolder" -> {
                     if(!Utils.checkArguments(commandList, 2)){
@@ -311,6 +300,41 @@ public class Main {
 //                    System.out.println(newPath);
                     currentFolder = fileSystem.findFolder(newPath);
                 }
+                case "list" -> {
+                    System.out.println("Directories:");
+                    System.out.print(fileSystem.getSharedFolder().print(0, false));
+                    System.out.print(currentFolder.print(0, false));
+                }
+                case "upload" -> {
+                    final File[] newFile = new File[1];
+                    try {
+                        SwingUtilities.invokeAndWait(() -> newFile[0] = filePicker());
+                    } catch (InterruptedException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                    byte[] bytes = CryptoUtils.symmetricEncrypt(Files.readAllBytes(newFile[0].toPath()), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
+                    currentFolder.addFile(newFile[0].getName(), false, bytes);
+                }
+                case "download" -> {
+                    if(!Utils.checkArguments(commandList, 2)){
+                        break;
+                    }
+                    SSFile tempFile = currentFolder.findFile(commandList[1]);
+                    if(tempFile == null){
+                        System.out.println("File not found!");
+                        break;
+                    }
+                    byte[] bytes = CryptoUtils.symmetricDecrypt(tempFile.getContent(), currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
+                    final File[] newFile = new File[1];
+                    try {
+                        SwingUtilities.invokeAndWait(() -> newFile[0] = folderPicker());
+                    } catch (InterruptedException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                    System.out.println(newFile[0].getAbsolutePath());
+                    File fileToWrite = new File(newFile[0].getAbsolutePath() + File.separator + commandList[1]);
+                    Files.write(fileToWrite.toPath(), bytes);
+                }
                 case "logout" ->{
                     exitCommand = "logout";
                 }
@@ -342,6 +366,7 @@ public class Main {
                     default -> algorithm = "AES";
                 }
                 SecretKey secretKey = new SecretKeySpec(secretKeyBytes,algorithm);
+                writeHash("ucitao: "+Base64.getEncoder().encodeToString(secretKeyBytes));
                 user = new User(username, password, salt, hashAlgorithmCode, cryptoAlgorithmCode, secretKey);
                 allUsers.add(user);
             }
@@ -392,6 +417,16 @@ public class Main {
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
                 "pdf,txt,png,jpeg,docx", "pdf", "txt", "png", "jpeg", "docx");
         chooser.setFileFilter(filter);
+        int returnVal = chooser.showOpenDialog(null);
+        if(returnVal == JFileChooser.APPROVE_OPTION) {
+            return chooser.getSelectedFile();
+        }
+        return null;
+    }
+
+    public static File folderPicker(){
+        JFileChooser chooser = new JFileChooser();
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int returnVal = chooser.showOpenDialog(null);
         if(returnVal == JFileChooser.APPROVE_OPTION) {
             return chooser.getSelectedFile();
