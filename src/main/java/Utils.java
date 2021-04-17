@@ -32,4 +32,16 @@ public class Utils {
     public static String centerString (int width, String s) {
         return String.format("%-" + width  + "s", String.format("%" + (s.length() + (width - s.length()) / 2) + "s", s));
     }
+
+    public static boolean checkArguments(String[] commandList, int argumentNumber){
+        if(commandList.length < argumentNumber){
+            System.out.println("Insufficient number of arguments!");
+            return false;
+        }
+        if(commandList[1].length() > 10){
+            System.out.println("File name is too long!");
+            return false;
+        }
+        return true;
+    }
 }

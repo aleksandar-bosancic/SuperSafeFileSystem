@@ -4,6 +4,7 @@ package fileSystem;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SSFolder extends SSFile implements Serializable {
@@ -41,5 +42,27 @@ public class SSFolder extends SSFile implements Serializable {
 
     public String print(){
         return this.getPath();
+    }
+
+    @Override
+    public String toString() {
+        return "SSFolder{" +
+                "path='" + path + '\'' +
+                ", owner='" + owner + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        SSFolder folder = (SSFolder) o;
+        return depth == folder.depth && Objects.equals(files, folder.files);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), files, depth);
     }
 }

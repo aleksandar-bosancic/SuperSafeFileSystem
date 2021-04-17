@@ -51,8 +51,10 @@ public class Main {
         Utils.writeWelcomeMessage("");
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
-        fileSystem.addNewFolder("kiki/");
-        fileSystem.addNewFolder("carak/");
+//        fileSystem.addNewFolder("kiki/");
+//        fileSystem.addNewFolder("fifi/");
+//        fileSystem.addNewFolder("carak/");
+//        fileSystem.addNewFolder("pipi");
 //        fileSystem.addNewFolder("kiki/newFolder/");
 //        fileSystem.addNewFolder("kiki/newFolder2/");
 //        fileSystem.addNewFolder("tuki");
@@ -212,7 +214,6 @@ public class Main {
     }
 
     public static void userWorkspace(User currentUser, SSFileSystem fileSystem) throws IOException {
-        String argumentNumberError = "Insufficient number of arguments!";
         SSFolder currentFolder = currentUser.getRoot();
         Utils.writeWelcomeMessage(currentUser.getUsername());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
@@ -227,36 +228,80 @@ public class Main {
             command = commandList[0];
             switch (command){
                 case "makefile" -> {
-                    if(commandList.length < 3){
-                        System.out.println(argumentNumberError);
-                    } else {
-                        SSFile file = new SSFile(currentFolder.getPath() + "/" + commandList[1] + "/",
-                                                currentUser.getUsername(), fullCommand.split(" ", 3)[2].getBytes());
-                        currentFolder.addFile(commandList[1], false, fullCommand.split(" ", 3)[2].getBytes());
+                    if(!Utils.checkArguments(commandList, 3)){
+                        break;
+                    }
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        System.out.println("This command is not allowed in shared folder!");
+                    }
+//                        SSFile file = new SSFile(currentFolder.getPath() + "/" + commandList[1] + "/",
+//                                                currentUser.getUsername(), fullCommand.split(" ", 3)[2].getBytes());
+                    currentFolder.addFile(commandList[1], false, fullCommand.split(" ", 3)[2].getBytes());
 //                        Path current = Paths.get("");
 //                        File tempFile = new File(current.toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1] + ".txt");
 //                        String temp = fullCommand.split(" ", 3)[2];
 //                        Files.write(tempFile.toPath(), temp.getBytes());
 //                        Desktop.getDesktop().open(tempFile);
-                    }
-                    System.out.println(fileSystem);
+
+//                    System.out.println(fileSystem);
                 }
                 case "getfile" -> {
-                    if(commandList.length < 2){
-                        System.out.println(argumentNumberError);
-                    } else {
-                        SSFile tempFile = currentFolder.findFile(commandList[1]);
-                        File temp = new File(Paths.get("").toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1]);
-                        Files.write(temp.toPath(), tempFile.getContent());
-                        Desktop.getDesktop().open(temp);
+                    if(!Utils.checkArguments(commandList, 2)){
+                        break;
                     }
+                    SSFile tempFile = currentFolder.findFile(commandList[1]);
+                    File temp = new File(Paths.get("").toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1]);
+                    Files.write(temp.toPath(), tempFile.getContent());
+                    Desktop.getDesktop().open(temp);
+
+                }
+                case "makefolder" -> {
+                    if(!Utils.checkArguments(commandList, 2)){
+                    break;
+                }
+                    if(commandList[1].equals("shared")){
+                        System.out.println("Can not create another shared folder");
+                        break;
+                    }
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        System.out.println("This command is not allowed in shared folder!");
+                    }
+//                    SSFolder folder = new SSFolder(currentFolder.getPath() + "/" + fullCommand.split(" ", 2)[1] + "/", currentUser.getUsername());
+                    currentFolder.addFile(commandList[1], true, null);
                 }
                 case "message" -> {
-                    if(commandList.length < 3){
-                        System.out.println(argumentNumberError);
-                    } else {
-
+                    if(!Utils.checkArguments(commandList, 3)){
+                        break;
                     }
+                }
+                case "enter" -> {
+                    if(!Utils.checkArguments(commandList, 2)){
+                        break;
+                    }
+                    if(commandList[1].equals("shared")){
+                        currentFolder = fileSystem.findFolder("shared/");
+                        break;
+                    }
+                    SSFile possiblyFolder = currentFolder.findFile(commandList[1]);
+                    if(possiblyFolder instanceof SSFolder) {
+                        currentFolder = (SSFolder) possiblyFolder;
+                    } else if(possiblyFolder == null){
+                        System.out.println(commandList[1] + " does not exist!");
+                    } else {
+                        System.out.println(commandList[1] + " is not a folder!");
+                    }
+                }
+                case "back" -> {
+                    if(currentFolder.equals(currentUser.getRoot()) ){
+                        System.out.println(currentFolder.getPath() + " is root folder!");
+                        break;
+                    } else if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        currentFolder = currentUser.getRoot();
+                        break;
+                    }
+                    String newPath = currentFolder.getPath().replaceAll("[^\\/]*\\/$", "").replaceAll("^\\/", "");
+//                    System.out.println(newPath);
+                    currentFolder = fileSystem.findFolder(newPath);
                 }
                 case "logout" ->{
                     exitCommand = "logout";
@@ -276,9 +321,9 @@ public class Main {
         try (BufferedReader reader = new BufferedReader(new FileReader(file))){
             while((line = reader.readLine()) != null){
                 String decodedLine = new String(Base64.getDecoder().decode(line), StandardCharsets.UTF_8);
-                String salt = decodedLine.split(" # ")[2];
                 String username = decodedLine.split(" # ")[0];
                 String password = decodedLine.split(" # ")[1];
+                String salt = decodedLine.split(" # ")[2];
                 int hashAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[3]);
                 int cryptoAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[4]);
                 byte[] byteSalt = Utils.convertSalt(salt);
