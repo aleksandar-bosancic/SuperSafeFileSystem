@@ -33,6 +33,10 @@ public class SSFolder extends SSFile implements Serializable {
         }
     }
 
+    public boolean delete(SSFile file){
+        return files.remove(file);
+    }
+
     public String print(int depth, boolean isRoot) {
         String str = "";
         str += super.print(depth,isRoot) + System.lineSeparator();

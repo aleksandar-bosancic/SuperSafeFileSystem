@@ -1,31 +1,37 @@
 
+J
+java:S1199¢"-Extract this nested code block into a method.(Ğİ·G8°«¤/
+J
+java:S1199Ì"-Extract this nested code block into a method.(´‰ö$8õÙîä/
+P
+java:S1199Ë"-Extract this nested code block into a method.(ıˆáòüÿÿÿÿ8°«¤/
 j
-java:S1192â"GDefine a constant instead of duplicating this literal "logout" 3 times.(ûÀ¿òşÿÿÿÿ8õÙîä/
-K
-java:S1199Ï"-Extract this nested code block into a method.(Á‰ª8ŠË¸/
-K
-java:S1199®"-Extract this nested code block into a method.(Õ˜ıƒ8¾ìæı/
-f
-java:S1192"PDefine a constant instead of duplicating this literal "users/users.txt" 5 times.(‘•Âå
-J
-java:S1199û"-Extract this nested code block into a method.(´‰ö$8õÙîä/
+java:S1192¼"GDefine a constant instead of duplicating this literal "logout" 3 times.(ûÀ¿òşÿÿÿÿ8õÙîä/
 P
-java:S1199­"-Extract this nested code block into a method.(»ö©ªşÿÿÿÿ8ŠË¸/
-K
-java:S1199è"-Extract this nested code block into a method.(Ï¿³¶8õÙîä/
+java:S1199×"-Extract this nested code block into a method.(¿‹ñçùÿÿÿÿ8€—ëû/
 J
-java:S1199a"-Extract this nested code block into a method.(”’ì’8ŠË¸/
+java:S1199ş"-Extract this nested code block into a method.(°Æ‰T8°«¤/
+K
+java:S1199Î"-Extract this nested code block into a method.(üØô8°«¤/
+M
+java:S1481ö"/Remove this unused "sessionKey" local variable.(Íç÷Ö8â‰ú¥/
 P
-java:S1199Š"-Extract this nested code block into a method.(¿‹ñçùÿÿÿÿ8€—ëû/
-K
-java:S1199˜"-Extract this nested code block into a method.(¿Ú¼İ8õ‚¥ı/
-K
-java:S1199½"-Extract this nested code block into a method.(üØô8æÊĞş/
-o
-java:S3776"RRefactor this method to reduce its Cognitive Complexity from 69 to the 15 allowed.(œû¿Ø8‡êçŒ/
-p
-java:S3776Ú"RRefactor this method to reduce its Cognitive Complexity from 42 to the 15 allowed.(ñ÷Ğ‘8Îú§ı/
+java:S1199‡"-Extract this nested code block into a method.(»ö©ªşÿÿÿÿ8ŠË¸/
+l
+java:S1192"JDefine a constant instead of duplicating this literal "users.txt" 3 times.(½¿º´ùÿÿÿÿ8î¡‰£/
 J
-java:S1199"-Extract this nested code block into a method.(°Æ‰T8õ‚¥ı/
+java:S1199ä"-Extract this nested code block into a method.(õÃ’#8õ‚¥ı/
+K
+java:S1199š"-Extract this nested code block into a method.(¤ç“É8°«¤/
+h
+java:S1192"FDefine a constant instead of duplicating this literal "users" 3 times.(½¿º´ùÿÿÿÿ8î¡‰£/
+J
+java:S1199<"-Extract this nested code block into a method.(”’ì’8ŠË¸/
+K
+java:S1199Â"-Extract this nested code block into a method.(Ï¿³¶8õÙîä/
+K
+java:S1199"-Extract this nested code block into a method.(Õ˜ıƒ8°«¤/
 P
-java:S1199º"-Extract this nested code block into a method.(ıˆáòüÿÿÿÿ8æÊĞş/
+java:S1199²"-Extract this nested code block into a method.(Ûµªôşÿÿÿÿ8°«¤/
+K
+java:S1199©"-Extract this nested code block into a method.(Á‰ª8ŠË¸/

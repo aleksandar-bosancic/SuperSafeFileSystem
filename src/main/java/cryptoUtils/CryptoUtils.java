@@ -15,6 +15,9 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 public class CryptoUtils {
+    private static final String NO_SUCH_ALGORITHM = "No such algorithm!";
+
+    private CryptoUtils(){}
 
     public static String encryptPassword(String password, byte[] salt, int algorithmCode)  {
         String hashPassword = null;
@@ -30,9 +33,22 @@ public class CryptoUtils {
             messageDigest.update(salt);
             hashPassword = new String(messageDigest.digest(password.getBytes()), StandardCharsets.UTF_8);
         } catch (NoSuchAlgorithmException e) {
-            System.out.println("No such algorithm!");
+            System.out.println(NO_SUCH_ALGORITHM);
         }
         return hashPassword;
+    }
+
+    public static byte[] hashData(byte[] input){
+        byte[] output;
+        MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance("SHA-512");
+        } catch (NoSuchAlgorithmException e) {
+            System.out.println(NO_SUCH_ALGORITHM);
+            return new byte[0];
+        }
+        output = messageDigest.digest(input);
+        return output;
     }
 
     public static SecretKey generateKey(int algorithmCode){
@@ -48,7 +64,7 @@ public class CryptoUtils {
             keyGenerator = KeyGenerator.getInstance(algorithm);
             key = keyGenerator.generateKey();
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            System.out.println(NO_SUCH_ALGORITHM);
         }
         return key;
     }
@@ -67,13 +83,13 @@ public class CryptoUtils {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             output = cipher.doFinal(input);
         } catch (NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchPaddingException | InvalidKeyException e) {
-            e.printStackTrace();
+            System.out.println("Wrong key");
         }
         return output;
     }
 
     public static byte[] symmetricDecrypt(byte[] input, int algorithmCode, SecretKey key){
-        byte[] output = null;
+        byte[] output;
         Cipher cipher;
         try {
             String algorithm;
@@ -86,7 +102,8 @@ public class CryptoUtils {
             cipher.init(Cipher.DECRYPT_MODE, key);
             output = cipher.doFinal(input);
         } catch (NoSuchAlgorithmException | IllegalBlockSizeException | BadPaddingException | NoSuchPaddingException | InvalidKeyException e) {
-            e.printStackTrace();
+            System.out.println("Wrong decryption key!");
+            return "You have not authorization to open this file!".getBytes(StandardCharsets.UTF_8);
         }
         return output;
     }
@@ -97,7 +114,7 @@ public class CryptoUtils {
             System.out.println("Key does not exist!");
             return null;
         }
-        PublicKey publicKey = null;
+        PublicKey publicKey;
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PemReader pemReader;
@@ -108,7 +125,8 @@ public class CryptoUtils {
                 publicKey = keyFactory.generatePublic(publicKeySpec);
             }
         } catch (InvalidKeySpecException | IOException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            System.out.println("Invalid key");
+            return null;
         }
         return publicKey;
     }
@@ -119,7 +137,7 @@ public class CryptoUtils {
             System.out.println("Key does not exist!");
             return null;
         }
-        PrivateKey privateKey = null;
+        PrivateKey privateKey;
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PemReader pemReader;
@@ -130,7 +148,8 @@ public class CryptoUtils {
                 privateKey = keyFactory.generatePrivate(privateKeySpec);
             }
         } catch (NoSuchAlgorithmException | InvalidKeySpecException | IOException e) {
-            e.printStackTrace();
+            System.out.println("Invalid key");
+            return null;
         }
         return privateKey;
     }
@@ -198,7 +217,7 @@ public class CryptoUtils {
                 System.out.println(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Could not generate certificate!");
         }
     }
 
@@ -211,7 +230,7 @@ public class CryptoUtils {
                 crl = (X509CRL) certificateFactory.generateCRL(fileInputStream);
             }
         }   catch (IOException | CertificateException | CRLException e) {
-            e.printStackTrace();
+            System.out.println("Could not load CRL!");
         }
         return crl;
     }
@@ -220,6 +239,11 @@ public class CryptoUtils {
         X509Certificate certificate = getCertificate(name);
         X509Certificate caCertificate = getCertificate("rootca");
         X509CRL crl = getCrl("list1");
+        String regex = "CN=" + name;
+        if(!certificate.getSubjectDN().getName().contains(regex)){
+            System.out.println("Name does not match with certificate name!");
+            return false;
+        }
         try {
             certificate.verify(caCertificate.getPublicKey());
         } catch (CertificateException | SignatureException | NoSuchProviderException | InvalidKeyException | NoSuchAlgorithmException e) {
@@ -243,11 +267,11 @@ public class CryptoUtils {
         byte[] signatureData = null;
         try {
             Signature signature = Signature.getInstance("SHA1withRSA");
-            signature.initSign(CryptoUtils.readPrivateKey(keyName));
+            signature.initSign(readPrivateKey(keyName));
             signature.update(input);
             signatureData = signature.sign();
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            e.printStackTrace();
+            System.out.println("Invalid key!");
         }
         return signatureData;
     }
@@ -256,11 +280,11 @@ public class CryptoUtils {
         boolean isVerified = false;
         try {
             Signature verifySignature = Signature.getInstance("SHA1withRSA");
-            verifySignature.initVerify(CryptoUtils.readPublicKey(keyName));
+            verifySignature.initVerify(readPublicKey(keyName));
             verifySignature.update(input);
             isVerified = verifySignature.verify(signatureBytes);
         } catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException e) {
-            e.printStackTrace();
+            System.out.println("Invalid key!");
         }
         return isVerified;
     }

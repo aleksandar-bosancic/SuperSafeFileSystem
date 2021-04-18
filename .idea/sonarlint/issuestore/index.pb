@@ -117,3 +117,5 @@ B
 CA/public/popo.key,6\3\63aa3fd0ac327928ac630169a457a24968757148
 A
 CA/certs/popo.pem,8\1\81fc600304f803d30cd967a08e854187a53bcb9c
+A
+Root/novifajl.txt,1\f\1ffa3e1e040b5a8b8abc7748ea01bf0a79062fa4

@@ -5,10 +5,9 @@ import java.io.*;
 public class SSFileSystem implements Serializable {
     protected SSFolder root;
     protected SSFolder sharedFolder;
-    protected String rootUser;
 
     public SSFileSystem() {
-        root = new SSFolder("/", rootUser);
+        root = new SSFolder("/", null);
         sharedFolder = (SSFolder) root.addFile("shared", true, new byte[0]);
     }
 
@@ -24,7 +23,6 @@ public class SSFileSystem implements Serializable {
     public SSFolder findFolder(String path){
         String[] splitedString = path.split("/");
         SSFolder temp = root;
-//        SSFile rootFile = root.findFile(splitedString[0]);
         if(splitedString.length == 1){
             SSFile tempFile = root.findFile(splitedString[0]);
             if(tempFile instanceof SSFolder){
@@ -40,9 +38,6 @@ public class SSFileSystem implements Serializable {
                 return null;
             }
         }
-//        if(rootFile instanceof SSFolder){
-//            return (SSFolder) rootFile;
-//        }
         return temp;
     }
 
@@ -67,10 +62,6 @@ public class SSFileSystem implements Serializable {
             return null;
         }
         return fileSystem;
-    }
-
-    public SSFolder getRoot() {
-        return root;
     }
 
     public SSFolder getSharedFolder() {

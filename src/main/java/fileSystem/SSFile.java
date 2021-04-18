@@ -23,7 +23,7 @@ public class SSFile implements Serializable {
         String padding = "└─" + IntStream.range(0,depth*4).mapToObj(item -> "─").reduce("", (a,b)-> a+b);
         String name = path.split("/")[path.split("/").length - 1];
         String printOut = padding + name;
-        if(name.matches("[a-z]*\\.[a-z]+")){
+        if(name.matches("[a-z0-9A-Z]*\\.[a-z]+")){
             printOut += "\r\n";
         }
         return printOut;
@@ -31,10 +31,6 @@ public class SSFile implements Serializable {
 
     public String getPath() {
         return path;
-    }
-
-    public String getOwner(){
-        return owner;
     }
 
     public byte[] getContent() {

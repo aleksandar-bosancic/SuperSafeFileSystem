@@ -8,87 +8,51 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
-import java.util.*;
+import java.util.Optional;
 
 public class Main {
+
+    public static final String ACTION_NOT_ALLOWED = "Action not allowed in this folder!";
+    public static final String LOGOUT = "logout";
+    public static final String SHARED = "shared";
+    public static final String MESSAGE_FOR = "_message_for_";
+    public static final String MESSAGES_FOLDER = "messages";
+    public static final String TEMP_FOLDER = "temp";
+    public static final String USERS_FOLDER = "users";
+    public static final String USERS_TXT = "users.txt";
 
     public static void main(String[] args) throws IOException {
         Security.addProvider(new BouncyCastleProvider());
         SSFolder currentFolder;
-        List<User> allUsers = null;
-        if(Utils.checkIfFileExists("users/users.txt")) {
-            allUsers = readAllUsers();
+        List<User> allUsers;
+        if(Utils.checkIfFileExists(Paths.get("").toAbsolutePath() + File.separator + USERS_FOLDER
+                                                                            + File.separator + USERS_TXT)) {
+            allUsers = Utils.readAllUsers();
         } else {
             allUsers = new ArrayList<>();
         }
+
         SSFileSystem fileSystem = SSFileSystem.deserialize();
         if(fileSystem == null){
             fileSystem = new SSFileSystem();
         }
-        currentFolder = fileSystem.getRoot();
-//        ProcessBuilder builder = new ProcessBuilder(
-//                "cmd.exe", "/c", "cd CA && .\\gencert.sh fifi");
-//        builder.redirectErrorStream(true);
-//        Process p = builder.start();
-//        BufferedReader r = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//        String line;
-//        while (true) {
-//            line = r.readLine();
-//            if (line == null) { break; }
-//            System.out.println(line);
-//        }
-
-//        CryptoUtils.generateCertificate("tuki");
-
-        Utils.writeWelcomeMessage("");
+        Utils.writeWelcomeMessage();
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
-
-//        fileSystem.addNewFolder("fifi/");
-//        fileSystem.addNewFolder("carak/");
-//        fileSystem.addNewFolder("pipi");
-//        fileSystem.addNewFolder("kiki/newFolder/");
-//        fileSystem.addNewFolder("kiki/newFolder2/");
-//        fileSystem.addNewFolder("tuki");
-//        fileSystem.addNewFolder("tuki/veliki/");
-//        System.out.println("Current: " + currentFolder.print());
-//        System.out.println(fileSystem);
-//        String stringToSign = "Neki string sto ga treba potpisati.";
-//        byte[] stringData = stringToSign.getBytes(StandardCharsets.UTF_8);
-//
-//        byte[] signatureBytes = CryptoUtils.signFile(stringData,"carak");
-//
-//        String base64encodedStringLine = Base64.getEncoder().encodeToString(signatureBytes);
-//        System.out.println("Signature: " + base64encodedStringLine);
-//
-//        boolean isVerified = CryptoUtils.verifySignature(stringData, signatureBytes, "miki");
-//
-//        System.out.println("Verified: " + isVerified);
-
-//        getCrl("list1");
-
-//        File nonEncryptedFile = new File(Paths.get("").toAbsolutePath() + File.separator + "neki.txt");
-//        byte[] bytes = Files.readAllBytes(nonEncryptedFile.toPath());
-//        SecretKey key = CryptoUtils.generateKey("AES");
-//        byte[] encBytes = CryptoUtils.symmetricEncrypt(bytes, 3, key);
-//        Files.write(encryptedFile.toPath(), encBytes);
-//        File decrypted = new File(current.toAbsolutePath().toString() + File.separator + "encfile.txt");
-//        byte[] newBytes = Files.readAllBytes(decrypted.toPath());
-//        byte[] newDecriptedBytes = CryptoUtils.symmetricDecrypt(newBytes, 3, key);
-//        Files.write(newNonFile.toPath(), newDecriptedBytes);
-
-//        Desktop.getDesktop().open(newNonFile);
         String command = "";
         while (true){
             System.out.print(">");
@@ -104,7 +68,8 @@ public class Main {
                         System.out.println("Username too long!" + "\nMaximum username length is 10 characters.");
                         break;
                     }
-                    if(Utils.checkIfFileExists("users/users.txt") && checkUserExists(username)){
+                    if(Utils.checkIfFileExists(Paths.get("").toAbsolutePath() + File.separator + USERS_FOLDER
+                                              + File.separator + USERS_TXT) && Utils.checkUserExists(username)){
                         System.out.println("Username already exists\n");
                         break;
                     }
@@ -153,13 +118,14 @@ public class Main {
                             byte[] salt = new byte[32];
                             random.nextBytes(salt);
                             String encryptedPassword = CryptoUtils.encryptPassword(password, salt, hashCode);
-                            newUser = new User(username, encryptedPassword, salt, hashCode, cypherCode, CryptoUtils.generateKey(cypherCode));
+                            newUser = new User(username, encryptedPassword, salt, hashCode, cypherCode,
+                                               CryptoUtils.generateKey(cypherCode));
                             allUsers.add(newUser);
                         } catch (NoSuchAlgorithmException e) {
                             System.out.println("No such algorithm");
                             break;
                         }
-                        if (writeUser(newUser)) {
+                        if (Utils.writeUser(newUser)) {
                             System.out.println("New user successfully registered!\nCreating new user directory...\n");
                             CryptoUtils.generateCertificate(username);
                             newUser.setRoot(fileSystem.addNewFolder(username + "/"));
@@ -173,19 +139,21 @@ public class Main {
                     String username;
                     String password;
                     User currentUser;
-                    if(!Utils.checkIfFileExists("users/users.txt")){
+                    if(!Utils.checkIfFileExists(Paths.get("").toAbsolutePath() + File.separator + USERS_FOLDER
+                                                                                         + File.separator + USERS_TXT)){
                         System.out.println("No users registered!\n");
                         break;
                     }
                     System.out.print("Enter username: ");
                     username = bufferedReader.readLine();
-                    if(checkUserExists(username)){
+                    if(Utils.checkUserExists(username)){
                         Optional<User> optionalUser = allUsers.stream().filter(user -> user.getUsername().equals(username)).findFirst();
                         if(optionalUser.isPresent()) {
                             currentUser = optionalUser.get();
                             System.out.print("Enter password: ");
                             password = bufferedReader.readLine();
-                            String passwordHash = CryptoUtils.encryptPassword(password, currentUser.getSalt(), currentUser.getHashAlgorithmCode());
+                            String passwordHash = CryptoUtils.encryptPassword(password, currentUser.getSalt(),
+                                                                              currentUser.getHashAlgorithmCode());
                             if(passwordHash.equals(currentUser.getPassword())){
                                 if(CryptoUtils.checkCertificateValidity(username)){
                                     System.out.println("Login successful!\n");
@@ -202,10 +170,24 @@ public class Main {
                     } else {
                         System.out.println(username + " does not exist in database!\n");
                     }
+                    Utils.writeWelcomeMessage();
                 }
                 case "exit" ->{
+                    boolean status = fileSystem.serialize();
+                    int retryNumber = 0;
+                    while (!status && retryNumber <= 100) {
+                        for (User user : allUsers) {
+                            System.out.println(user.getUsername());
+                            fileSystem.addNewFolder(user.getUsername());
+                        }
+                        status = fileSystem.serialize();
+                        retryNumber++;
+                    }
+                    if(retryNumber > 99){
+                        System.out.println("File system has corrupted");
+                        System.out.println("Could not restore root folders");
+                    }
                     System.out.println("Good bye!");
-                    fileSystem.serialize();
                     bufferedReader.close();
                     return;
                 }
@@ -216,13 +198,13 @@ public class Main {
 
     public static void userWorkspace(User currentUser, SSFileSystem fileSystem) throws IOException {
         SSFolder currentFolder = currentUser.getRoot();
-        Utils.writeWelcomeMessage(currentUser.getUsername());
+        Utils.writeUserWelcomeMessage(currentUser.getUsername());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
         String exitCommand = "";
         String fullCommand;
         String[] commandList;
         String command;
-        while (!exitCommand.equals("logout")){
+        while (!exitCommand.equals(LOGOUT)){
             System.out.print(currentFolder.getPath() + "> ");
             fullCommand = bufferedReader.readLine();
             commandList = fullCommand.split(" ");
@@ -233,50 +215,127 @@ public class Main {
                         break;
                     }
                     if(currentFolder.equals(fileSystem.getSharedFolder())){
-                        System.out.println("This command is not allowed in shared folder!");
+                        System.out.println(ACTION_NOT_ALLOWED);
+                        break;
                     }
-                    byte[] bytes = CryptoUtils.symmetricEncrypt(fullCommand.split(" ", 3)[2].getBytes(), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
+                    if(!commandList[1].endsWith(".txt")){
+                        System.out.println("it is possible to create .txt files only!");
+                        break;
+                    }
+                    if(currentFolder.findFile(commandList[1]) != null){
+                        System.out.println("File with same name already exists!");
+                        break;
+                    }
+                    byte[] bytes = CryptoUtils.symmetricEncrypt(fullCommand.split(" ", 3)[2].getBytes(),
+                                                                currentUser.getCryptoAlgorithmCode(),
+                                                                currentUser.getSymmetricKey());
                     currentFolder.addFile(commandList[1], false, bytes);
                 }
                 case "getfile" -> {
                     if(!Utils.checkArguments(commandList, 2)){
                         break;
                     }
-                    SSFile tempFile = currentFolder.findFile(commandList[1]);
-                    if(tempFile == null){
-                        System.out.println("File not found!");
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        File message = new File(Paths.get("").toAbsolutePath() + File.separator
+                                     + MESSAGES_FOLDER + File.separator + commandList[1]
+                                     + MESSAGE_FOR + currentUser.getUsername() + ".txt");
+                        if(!message.exists()){
+                            System.out.println("Access denied!");
+                            break;
+                        }
+                        String messageData = Files.readString(message.toPath());
+                        String[] messageDetails = messageData.split(" # ");
+                        byte[] encryptedSessionKey = Base64.getDecoder().decode(messageDetails[0]);
+                        byte[] encryptedDigitalSignature = Base64.getDecoder().decode(messageDetails[1]);
+                        String senderName = messageDetails[2];
+                        if(!CryptoUtils.checkCertificateValidity(senderName)){
+                            System.out.println(senderName + " does not have a valid certificate!");
+                            break;
+                        }
+                        byte[] sessionKey = CryptoUtils.asymmetricDecrypt(encryptedSessionKey, currentUser.getUsername());
+                        SecretKey secretKey = new SecretKeySpec(sessionKey, "AES");
+                        byte[] digitalSignature = CryptoUtils.symmetricDecrypt(encryptedDigitalSignature, 3, secretKey);
+                        byte[] fileData = Utils.getFile(currentFolder, commandList[1], 3, secretKey);
+                        byte[] hashedFileData = CryptoUtils.hashData(fileData);
+                        if(!CryptoUtils.verifySignature(hashedFileData, digitalSignature, senderName)){
+                            System.out.println("Signatures do not match!");
+                            break;
+                        }
+                        File sharedTemp = new File(Paths.get("").toAbsolutePath() + File.separator
+                                        + TEMP_FOLDER + File.separator + commandList[1]);
+                        Files.write(sharedTemp.toPath(), fileData);
+                        Desktop.getDesktop().open(sharedTemp);
                         break;
                     }
-                    File temp = new File(Paths.get("").toAbsolutePath() + File.separator + "Root" + File.separator + commandList[1]);
-                    byte[] bytes = CryptoUtils.symmetricDecrypt(tempFile.getContent(), currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
-                    Files.write(temp.toPath(), bytes);//tempFile.getContent());
-                    Desktop.getDesktop().open(temp);
+                    File temp = new File(Paths.get("").toAbsolutePath() + File.separator
+                              + TEMP_FOLDER + File.separator + commandList[1]);
+                    byte[] bytes = Utils.getFile(currentFolder, commandList[1], currentUser.getCryptoAlgorithmCode(),
+                                                                                currentUser.getSymmetricKey());
+                    if(bytes.length != 0) {
+                        Files.write(temp.toPath(), bytes);
+                        Desktop.getDesktop().open(temp);
+                    }
                 }
                 case "makefolder" -> {
                     if(!Utils.checkArguments(commandList, 2)){
                     break;
-                }
-                    if(commandList[1].equals("shared")){
+                    }
+                    if(commandList[1].equals(SHARED)){
                         System.out.println("Can not create another shared folder");
                         break;
                     }
                     if(currentFolder.equals(fileSystem.getSharedFolder())){
-                        System.out.println("This command is not allowed in shared folder!");
+                        System.out.println(ACTION_NOT_ALLOWED);
+                        break;
                     }
-//                    SSFolder folder = new SSFolder(currentFolder.getPath() + "/" + fullCommand.split(" ", 2)[1] + "/", currentUser.getUsername());
+                    if(currentFolder.findFile(commandList[1]) != null){
+                        System.out.println("Folder with same name already exists!");
+                        break;
+                    }
                     currentFolder.addFile(commandList[1], true, null);
                 }
-                case "message" -> {
+                case "share" -> {
                     if(!Utils.checkArguments(commandList, 3)){
                         break;
                     }
+                    if(!Utils.checkUserExists(commandList[2])){
+                        System.out.println("User does not exist!");
+                        break;
+                    }
+                    byte[] bytes = Utils.getFile(currentFolder, commandList[1], currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
+                    if(bytes.length == 0){
+                        break;
+                    }
+                    if(!CryptoUtils.checkCertificateValidity(commandList[2])){
+                        System.out.println(commandList[2] + " does not have a valid certificate!");
+                    }
+                    if(fileSystem.getSharedFolder().findFile(commandList[1]) != null){
+                        System.out.println("File with that name already exists!");
+                        break;
+                    }
+                    PublicKey receiverPublicKey = CryptoUtils.readPublicKey(commandList[2]);
+                    if(receiverPublicKey == null){
+                        break;
+                    }
+                    byte[] hashedData = CryptoUtils.hashData(bytes);
+                    byte[] digitalSignature = CryptoUtils.signFile(hashedData, currentUser.getUsername());
+                    SecretKey sessionKey = CryptoUtils.generateKey(3);
+                    byte[] encodedKey = sessionKey.getEncoded();
+                    byte[] encryptedSessionKey = CryptoUtils.asymmetricEncrypt(encodedKey, commandList[2]);
+                    byte[] encryptedDigitalSignature = CryptoUtils.symmetricEncrypt(digitalSignature, 3, sessionKey);
+                    File message = new File(Paths.get("").toAbsolutePath() + File.separator + MESSAGES_FOLDER + File.separator + commandList[1] + MESSAGE_FOR + commandList[2] + ".txt");
+                    String messageData = Base64.getEncoder().encodeToString(encryptedSessionKey) + " # "
+                                       + Base64.getEncoder().encodeToString(encryptedDigitalSignature) + " # "
+                                       + currentUser.getUsername();
+                    Files.writeString(message.toPath(), messageData);
+                    fileSystem.getSharedFolder().addFile(commandList[1], false, CryptoUtils.symmetricEncrypt(bytes, 3, sessionKey));
                 }
                 case "enter" -> {
                     if(!Utils.checkArguments(commandList, 2)){
                         break;
                     }
-                    if(commandList[1].equals("shared")){
-                        currentFolder = fileSystem.findFolder("shared/");
+                    if(commandList[1].equals(SHARED)){
+                        currentFolder = fileSystem.findFolder(SHARED);
                         break;
                     }
                     SSFile possiblyFolder = currentFolder.findFile(commandList[1]);
@@ -297,26 +356,42 @@ public class Main {
                         break;
                     }
                     String newPath = currentFolder.getPath().replaceAll("[^\\/]*\\/$", "").replaceAll("^\\/", "");
-//                    System.out.println(newPath);
                     currentFolder = fileSystem.findFolder(newPath);
                 }
                 case "list" -> {
                     System.out.println("Directories:");
+                    if(currentFolder != fileSystem.getSharedFolder()) {
+                        System.out.print(currentFolder.print(0, false));
+                    }
                     System.out.print(fileSystem.getSharedFolder().print(0, false));
-                    System.out.print(currentFolder.print(0, false));
+
                 }
                 case "upload" -> {
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        System.out.println(ACTION_NOT_ALLOWED);
+                        break;
+                    }
                     final File[] newFile = new File[1];
                     try {
-                        SwingUtilities.invokeAndWait(() -> newFile[0] = filePicker());
+                        SwingUtilities.invokeAndWait(() -> newFile[0] = Utils.filePicker());
                     } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        System.out.println("Could not open File Chooser!");
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                    if(newFile[0] == null){
+                        System.out.println("File not selected!");
+                        break;
                     }
                     byte[] bytes = CryptoUtils.symmetricEncrypt(Files.readAllBytes(newFile[0].toPath()), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
                     currentFolder.addFile(newFile[0].getName(), false, bytes);
                 }
                 case "download" -> {
                     if(!Utils.checkArguments(commandList, 2)){
+                        break;
+                    }
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        System.out.println(ACTION_NOT_ALLOWED);
                         break;
                     }
                     SSFile tempFile = currentFolder.findFile(commandList[1]);
@@ -327,119 +402,74 @@ public class Main {
                     byte[] bytes = CryptoUtils.symmetricDecrypt(tempFile.getContent(), currentUser.getCryptoAlgorithmCode(), currentUser.getSymmetricKey());
                     final File[] newFile = new File[1];
                     try {
-                        SwingUtilities.invokeAndWait(() -> newFile[0] = folderPicker());
+                        SwingUtilities.invokeAndWait(() -> newFile[0] = Utils.folderPicker());
                     } catch (InterruptedException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        System.out.println("Could not open Directory Chooser!");
+                        Thread.currentThread().interrupt();
+                        break;
                     }
-                    System.out.println(newFile[0].getAbsolutePath());
+                    if(newFile[0] == null) {
+                        System.out.println("File not selected");
+                        break;
+                    }
                     File fileToWrite = new File(newFile[0].getAbsolutePath() + File.separator + commandList[1]);
                     Files.write(fileToWrite.toPath(), bytes);
                 }
-                case "logout" ->{
-                    exitCommand = "logout";
+                case "delete" -> {
+                    SSFile tempFile = currentFolder.findFile(commandList[1]);
+                    if(!Utils.checkArguments(commandList, 2)){
+                        break;
+                    }
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        File message = new File(Paths.get("").toAbsolutePath() + File.separator + MESSAGES_FOLDER
+                                     + File.separator + commandList[1] + MESSAGE_FOR + currentUser.getUsername() + ".txt");
+                        if(!message.exists()){
+                            System.out.println("No authorization to delete " + commandList[1]);
+                            break;
+                        }
+                        currentFolder.delete(tempFile);
+                        Files.delete(message.toPath());
+                        if(message.exists()){
+                            System.out.println("Message could not be deleted, please contact system administrator!");
+                        }
+                    }
+                    if(commandList[1].equals(SHARED)){
+                        System.out.println("Can not create another shared folder");
+                        break;
+                    }
+                    if(tempFile == null){
+                        System.out.println("File/Folder does not exist");
+                        break;
+                    }
+                    if(currentFolder.delete(tempFile)){
+                        System.out.println(commandList[1] + " Deleted successfully!");
+                    } else {
+                        System.out.println("Delete failed!");
+                    }
+                }
+                case "edit" -> {
+                    SSFile tempFile = currentFolder.findFile(commandList[1]);
+                    if(!Utils.checkArguments(commandList, 3)){
+                        break;
+                    }
+                    if(currentFolder.equals(fileSystem.getSharedFolder())){
+                        System.out.println("This command is not allowed in shared folder!");
+                    }
+                    if(tempFile == null){
+                        System.out.println("File does not exist!");
+                        break;
+                    }
+                    currentFolder.delete(tempFile);
+                    byte[] bytes = CryptoUtils.symmetricEncrypt(fullCommand.split(" ", 3)[2].getBytes(), currentUser.getCryptoAlgorithmCode(),currentUser.getSymmetricKey());
+                    currentFolder.addFile(commandList[1], false, bytes);
+                }
+                case LOGOUT ->{
+                    exitCommand = LOGOUT;
                 }
                 default -> {
                     System.out.println("Wrong command!");
                 }
             }
         }
-    }
-
-    public static List<User> readAllUsers(){
-        User user;
-        List<User> allUsers = new ArrayList<>();
-        File file = new File("users/users.txt");
-        String line;
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))){
-            while((line = reader.readLine()) != null){
-                String decodedLine = new String(Base64.getDecoder().decode(line), StandardCharsets.UTF_8);
-                String username = decodedLine.split(" # ")[0];
-                String password = decodedLine.split(" # ")[1];
-                byte[] salt = Base64.getDecoder().decode(decodedLine.split(" # ")[2]);
-                int hashAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[3]);
-                int cryptoAlgorithmCode = Integer.parseInt(decodedLine.split(" # ")[4]);
-                byte[] secretKeyBytes = Base64.getDecoder().decode(decodedLine.split(" # ")[5]);
-                String algorithm;
-                switch (cryptoAlgorithmCode){
-                    case 1 -> algorithm = "DES";
-                    case 2 -> algorithm = "RC4";
-                    default -> algorithm = "AES";
-                }
-                SecretKey secretKey = new SecretKeySpec(secretKeyBytes,algorithm);
-                writeHash("ucitao: "+Base64.getEncoder().encodeToString(secretKeyBytes));
-                user = new User(username, password, salt, hashAlgorithmCode, cryptoAlgorithmCode, secretKey);
-                allUsers.add(user);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return allUsers;
-    }
-
-    public static boolean checkUserExists(String username){
-        return readAllUsers().stream().anyMatch(user -> user.getUsername().equals(username));
-    }
-
-    public static boolean writeUser(User user){
-        File file = new File("users/users.txt");
-        boolean status = true;
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true))){
-            if(!file.exists()){
-                status = file.createNewFile();
-            }
-            String stringLine = user.getUsername() + " # " + user.getPassword() + " # "
-                                                   + Base64.getEncoder().encodeToString(user.getSalt()) + " # "
-                                                   + user.getHashAlgorithmCode() + " # "
-                                                   + user.getCryptoAlgorithmCode() + " # "
-                                                   + Base64.getEncoder().encodeToString(user.getSymmetricKey().getEncoded());
-            writeHash("upis" + Base64.getEncoder().encodeToString(user.getSymmetricKey().getEncoded()));
-            String base64encodedStringLine = Base64.getEncoder().encodeToString(stringLine.getBytes());
-            bufferedWriter.write(base64encodedStringLine);
-            bufferedWriter.newLine();
-        } catch (IOException e) {
-            return false;
-        }
-        return status;
-    }
-
-    public static void writeHash(String hash) throws IOException {
-        File file = new File("users/hash.txt");
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true))) {
-            bufferedWriter.write(hash);
-            bufferedWriter.newLine();
-        } catch (IOException ioException) {
-            ioException.printStackTrace();
-        }
-    }
-
-    public static File filePicker(){
-        JFileChooser chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter(
-                "pdf,txt,png,jpeg,docx", "pdf", "txt", "png", "jpeg", "docx");
-        chooser.setFileFilter(filter);
-        int returnVal = chooser.showOpenDialog(null);
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
-        }
-        return null;
-    }
-
-    public static File folderPicker(){
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int returnVal = chooser.showOpenDialog(null);
-        if(returnVal == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
-        }
-        return null;
-    }
-
-//    public static void cls(){
-//        for(int i = 0; i <= 50; i++)
-//            System.out.println("\n");
-//    }
-
-    public static void cls() throws IOException, InterruptedException {
-        new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
     }
 }

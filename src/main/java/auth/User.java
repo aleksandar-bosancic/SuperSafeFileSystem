@@ -1,16 +1,15 @@
 package auth;
 
-import cryptoUtils.CryptoUtils;
 import fileSystem.SSFolder;
 
 import javax.crypto.SecretKey;
 
 public class User {
     private final String username;
-    private String password;
+    private final String password;
     private final int hashAlgorithmCode;
     private final int cryptoAlgorithmCode;
-    private byte[] salt;
+    private final byte[] salt;
     private SSFolder root;
     private final SecretKey symmetricKey;
 
@@ -29,17 +28,6 @@ public class User {
 
     public String getPassword() {
         return password;
-    }
-
-    @Override
-    public String toString() {
-        return "User{" +
-                "username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", hashAlgorithm='" + hashAlgorithmCode + '\'' +
-                ", cryptoAlgorithm='" + cryptoAlgorithmCode + '\'' +
-                ", root=" + root +
-                '}';
     }
 
     public byte[] getSalt() {
